@@ -1,4 +1,5 @@
 import math
+import threading
 import time
 from dataclasses import dataclass
 
@@ -21,39 +22,51 @@ def find_arduino():
                 ser.write(IDENTIFICATION_COMMAND)
                 deadline = time.monotonic() + 1.0
                 buffer = ""
+
                 while time.monotonic() < deadline:
                     if ser.in_waiting:
                         c = ser.read().decode(errors="ignore")
 
                         if c == "\n":
                             response = buffer.strip()
+
                             if response == EXPECTED_RESPONSE:
                                 return port.device
 
                             buffer = ""
                         else:
                             buffer += c
+
         except (serial.SerialException, UnicodeDecodeError):
             pass
 
     return None
 
 
-def measurements():
+def measurements(stop_event=None):
+    if stop_event is None:
+        stop_event = threading.Event()
+
     arduino_port = find_arduino()
+
     if arduino_port is None:
         raise RuntimeError("Arduino not detected")
 
     print(f"Arduino found on {arduino_port}")
-    with serial.Serial(arduino_port, BAUD_RATE, timeout=1) as ser:
+
+    with serial.Serial(arduino_port, BAUD_RATE, timeout=0.1) as ser:
         intervals = []
-        while True:
+
+        while not stop_event.is_set():
             line = ser.readline().decode("utf-8").strip()
+
             if not line.startswith("INTERVAL:"):
                 continue
+
             value = line.split(":", 1)[1]
             interval_us = int(value)
             intervals.append(interval_us)
+
             if len(intervals) == MARKS_PER_TURN:
                 yield compute_values(intervals)
                 intervals.clear()
@@ -67,19 +80,13 @@ def compute_values(intervals) -> Measurement:
     centrip_accel = (angular_velocity**2) * RADIUS_M
     centrip_g = centrip_accel / 9.81
 
-    rps = round(rps, 2)
-    rpm = round(rpm, 2)
-    angular_velocity = round(angular_velocity, 2)
-    centrip_accel = round(centrip_accel, 2)
-    centrip_g = round(centrip_g, 2)
-
     return Measurement(
         average_interval_us=average_interval_us,
-        rps=rps,
-        rpm=rpm,
-        angular_velocity=angular_velocity,
-        centripetal_accel=centrip_accel,
-        centripetal_g=centrip_g,
+        rps=round(rps, 2),
+        rpm=round(rpm, 2),
+        angular_velocity=round(angular_velocity, 2),
+        centripetal_accel=round(centrip_accel, 2),
+        centripetal_g=round(centrip_g, 2),
     )
 
 
