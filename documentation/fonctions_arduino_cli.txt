@@ -1,0 +1,4 @@
+compiler : arduino-cli compile --fqbn arduino:avr:uno .
+uploader : arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno .
+auditer : picocom -b 9600 /dev/ttyACM0
+fin du moniteur de série : ctrl + a , ctrl + x
