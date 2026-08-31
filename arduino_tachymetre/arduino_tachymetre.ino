@@ -5,16 +5,24 @@ constexpr size_t COMMAND_SIZE = 32;
 int lastSensorState = HIGH;
 char command[COMMAND_SIZE];
 size_t commandIndex = 0;
+unsigned long lastDetection = 0;
 
 void setup() {
+  Serial.begin(115200);
+  pinMode(SENSOR_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
   while (Serial.available()) {
     char c = Serial.read();
 
     if (c == '\n') {
+      //listen to the serial port and id the board to a script asking "who are you"
       command[commandIndex] = '\0';
 
       if (strcmp(command, "WHO_ARE_YOU?") == 0) {
-        Serial.println("TACHYMETRE_UNO_V1");
+        Serial.println("ID:TACHYMETRE_UNO_V1");
       }
 
       commandIndex = 0;
@@ -22,26 +30,23 @@ void setup() {
       command[commandIndex++] = c;
     }
   }
-  pinMode(SENSOR_PIN, INPUT);
-  pinMode(LED_PIN, OUTPUT);
-
-  Serial.begin(115200);
-}
-
-void loop() {
+  // Read the sensor
   int sensorState = digitalRead(SENSOR_PIN);
 
   digitalWrite(LED_PIN, sensorState);
 
-  if (sensorState != lastSensorState) {
-    if (sensorState == HIGH) {
-      Serial.println("Object detected");
-    } else {
-      Serial.println("No object");
+  if (sensorState == HIGH && lastSensorState == LOW) {
+    unsigned long now = micros();
+
+    if (lastDetection != 0) {
+      unsigned long interval = now - lastDetection;
+
+      Serial.print("INTERVAL:");
+      Serial.println(interval);
     }
 
-    lastSensorState = sensorState;
+    lastDetection = now;
   }
-
+  lastSensorState = sensorState;
   delay(10);
 }

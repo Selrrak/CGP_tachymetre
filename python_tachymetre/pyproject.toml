@@ -7,7 +7,11 @@ authors = [
     { name = "Selrrak", email = "chbou602@ulaval.ca" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+	"serial",
+	"pyserial",
+	"dataclasses"
+]
 
 [project.scripts]
 python-tachymetre = "python_tachymetre:main"
