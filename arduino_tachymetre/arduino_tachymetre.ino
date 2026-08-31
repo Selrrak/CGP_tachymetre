@@ -1,13 +1,31 @@
-const int SENSOR_PIN = 2;
-const int LED_PIN = 8;
+constexpr size_t SENSOR_PIN = 2;
+constexpr size_t LED_PIN = 8;
+constexpr size_t COMMAND_SIZE = 32;
 
 int lastSensorState = HIGH;
+char command[COMMAND_SIZE];
+size_t commandIndex = 0;
 
 void setup() {
+  while (Serial.available()) {
+    char c = Serial.read();
+
+    if (c == '\n') {
+      command[commandIndex] = '\0';
+
+      if (strcmp(command, "WHO_ARE_YOU?") == 0) {
+        Serial.println("TACHYMETRE_UNO_V1");
+      }
+
+      commandIndex = 0;
+    } else if (commandIndex < COMMAND_SIZE - 1) {
+      command[commandIndex++] = c;
+    }
+  }
   pinMode(SENSOR_PIN, INPUT);
   pinMode(LED_PIN, OUTPUT);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 void loop() {
