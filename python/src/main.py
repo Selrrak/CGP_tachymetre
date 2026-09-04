@@ -1,6 +1,7 @@
 import signal
 import sys
 import threading
+from pathlib import Path
 
 from PySide6.QtCore import QObject, QThread, Signal
 from PySide6.QtGui import QGuiApplication
@@ -46,7 +47,6 @@ worker.measurementReceived.connect(tachymeter.update)
 thread.started.connect(worker.run)
 
 thread.start()
-
 engine = QQmlApplicationEngine()
 
 engine.rootContext().setContextProperty(
@@ -54,7 +54,8 @@ engine.rootContext().setContextProperty(
     tachymeter,
 )
 
-engine.load("Main.qml")
+qml_file = Path(__file__).parent / "Main.qml"
+engine.load(qml_file)
 
 if not engine.rootObjects():
     sys.exit(-1)
