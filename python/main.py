@@ -5,8 +5,9 @@ import threading
 from PySide6.QtCore import QObject, QThread, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
-from serial_listener import measurements
-from tachymeter import Tachymeter
+
+from src.serial_listener import measurements
+from src.tachymeter import Tachymeter
 
 
 class SerialWorker(QObject):

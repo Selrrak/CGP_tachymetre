@@ -1,4 +1,5 @@
 from PySide6.QtCore import Property, QObject, Signal, Slot
+
 from serial_listener import Measurement, measurements
 
 
