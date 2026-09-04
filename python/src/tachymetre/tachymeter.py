@@ -1,6 +1,6 @@
 from PySide6.QtCore import Property, QObject, Signal, Slot
 
-from serial_listener import Measurement, measurements
+from src.tachymetre.serial_listener import Measurement, measurements
 
 
 class Tachymeter(QObject):
