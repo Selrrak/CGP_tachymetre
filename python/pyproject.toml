@@ -12,5 +12,6 @@ dependencies = [
 	"pyserial",
 	"dataclasses",
 	"pyside6>=6.11.2",
+	"pyinstaller>=6.22.3",
 ]
 
